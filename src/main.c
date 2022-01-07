@@ -31,7 +31,7 @@ void print_usage() {
     printf("\nCommon Options: \n");
     printf("  -p, --port      #         server port to listen on/connect to\n");
     printf("                            (default port: %d)\n", DEFAULT_PORT);
-    printf("  -v, --version             show version information and quit\n");
+    printf("  -v, --version             show version and quit\n");
     printf("  -h, --help                show usage message and quit\n");
     printf("  -d, --debug               print debug messages\n");
 
