@@ -40,9 +40,41 @@ $ dd if=/dev/urandom of=128mb_2 bs=1024 count=131072
 $ dd if=/dev/urandom of=128mb_3 bs=1024 count=131072
 $ dd if=/dev/urandom of=128mb_4 bs=1024 count=131072
 $ sha1sum 128mb_*
+sha1sum 128mb_*
+38fadac5b5c8f47043100885b8ef0d51f9480b00  128mb_1
+451d455932f4fe19191322ba0c6a87958f1a54b8  128mb_2
+caeaebe47ac5eac99d1040ebaec9143eb13d3189  128mb_3
+9e60d73325615a67c4a38a9edc3e92a9b8c0423b  128mb_4
 $ ./mftp -s
+[Server] Use multi-thread to accept clients.
+[Server] Server is running at 127.0.0.1:55555
+[Thread] Client is connected. (127.0.0.1:37824)
+[Thread] Client is connected. (127.0.0.1:37826)
+[Thread] Client is connected. (127.0.0.1:37822)
+[Thread] Client is connected. (127.0.0.1:37828)
+[Thread] Requested file: /home/user/128mb_2
+[Thread] Requested file: /home/user/128mb_1
+[Thread] Requested file: /home/user/128mb_3
+[Thread] Requested file: /home/user/128mb_4
+[Thread] File transfer complete!
+[Thread] File transfer complete!
+[Thread] File transfer complete!
+[Thread] File transfer complete!
 ```
 
 ```
 ./mftp -c 127.0.0.1 ~/128mb_1 ~/128mb_2 ~/128mb_3 ~/128mb_4
+[Client] Start downloading 4 file(s).
+
+100% [=================================================>] 128mb_1         (FINISHED)
+100% [=================================================>] 128mb_2         (FINISHED)
+100% [=================================================>] 128mb_3         (FINISHED)
+100% [=================================================>] 128mb_4         (FINISHED)
+
+[Client] Finished!
+$ sha1sum 128mb_*
+38fadac5b5c8f47043100885b8ef0d51f9480b00  128mb_1
+451d455932f4fe19191322ba0c6a87958f1a54b8  128mb_2
+caeaebe47ac5eac99d1040ebaec9143eb13d3189  128mb_3
+9e60d73325615a67c4a38a9edc3e92a9b8c0423b  128mb_4
 ```
