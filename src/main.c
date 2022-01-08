@@ -106,12 +106,3 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
-
-/*
-mkdir -p bin
-gcc main.c -o bin/main.o -c
-gcc server.c -o bin/server.o -c
-gcc client.c -o bin/client.o -c
-gcc bar.c -o bin/bar.o -c
-gcc -pthread -o mftp bin/main.o bin/server.o bin/client.o bin/bar.o
-*/

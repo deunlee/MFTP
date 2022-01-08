@@ -96,7 +96,7 @@ int run_client() {
         return 1;
     }
     if (! force_overwriting) {
-        for (; i < file_cnt; i++) {
+        for (i = 0; i < file_cnt; i++) {
             if (access(basename(file_path[i]), F_OK) == 0) { // If a file already exists:
                 printf("[Error] The file already exists. (%s)\n", basename(file_path[i]));
                 return 1;

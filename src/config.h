@@ -13,7 +13,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define VERSION               "1.0.0"
+#define VERSION               "1.0.1"
 #define MAX_CLIENTS                16
 #define MAX_PATH_LENGTH          4096
 #define BUFFER_SIZE              4096

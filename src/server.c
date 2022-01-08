@@ -4,20 +4,31 @@
 #include <errno.h>
 #include <sys/wait.h>
 
-void print_id() {
+void print_prefix() {
     if (accept_mode == USE_MULTI_PROCESS) {
-        printf("[Child] (PID=%d) ", getpid());
+        if (debug) {
+            printf("[Child] (PID=%d) ", getpid());
+        } else {
+            printf("[Child] ");
+        }
     } else if (accept_mode == USE_MULTI_THREAD) {
-        printf("[Thread] (TID=%ld) ", pthread_self());
+        if (debug) {
+            printf("[Thread] (TID=%ld) ", pthread_self());
+        } else {
+            printf("[Thread] ");
+        }
     }
 }
 
-int send_file(int sockfd) {
+int send_file(int sockfd, struct sockaddr_in* client_addr) {
     #define RETURN(n) { if (fp) fclose(fp); close(sockfd); free(buffer); return n; }
 
     size_t size, total_size;
     char* buffer = malloc(BUFFER_SIZE);
     FILE* fp = NULL;
+
+    print_prefix();
+    printf("Client is connected. (%s:%d)\n", inet_ntoa(client_addr->sin_addr), ntohs(client_addr->sin_port));
 
     // Receive length of file path and file path.
     if (recv(sockfd, &size, sizeof(size), MSG_WAITALL) == -1) {
@@ -28,7 +39,7 @@ int send_file(int sockfd) {
         perror("[Error] Failed to receive a file name");
         RETURN(1);
     }
-    print_id();
+    print_prefix();
     printf("Requested file: %s\n", buffer);
 
     // Open the file with read-only mode.
@@ -57,21 +68,21 @@ int send_file(int sockfd) {
             RETURN(1);
         }
     }
-    print_id();
-    printf("[Server] File transfer complete!\n");
+    print_prefix();
+    printf("File transfer complete!\n");
     RETURN(0);
 }
 
 void* send_file_by_thread(void* arg) {
     thread_info_s* info = (thread_info_s*)arg;
-    send_file(info->sockfd);
+    send_file(info->sockfd, &info->client_addr);
     free(info);
     pthread_exit(0);
 }
 
-int send_file_by_child_process(int sockfd) {
+int send_file_by_child_process(int sockfd, struct sockaddr_in* client_addr) {
     int ret;
-    ret = send_file(sockfd);
+    ret = send_file(sockfd, client_addr);
     kill(getppid(), SIGUSR1); // Send SIGUSR1 signal to the parent.
     return ret;
 }
@@ -86,7 +97,7 @@ void signal_handler(int signal) {
         pid = wait(&status);
         if (! debug) return;
         if (pid > 0) {
-            printf("[Server] Child (PID=%d) returned: %d\n", pid, WEXITSTATUS(status));
+            printf("[Server] (PID=%d) Child returned: %d\n", pid, WEXITSTATUS(status));
         } else if (pid == -1) {
             perror("[Error] Failed to wait a child process");
         }
@@ -143,10 +154,8 @@ int run_server() {
         if (accept_mode == USE_MULTI_PROCESS) {
             pid = fork(); // Create a child process.
             if (pid == 0) {
-                printf("[Child] (PID=%d) Client is connected. (%s:%d)\n", getpid(),
-                        inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
                 close(sockfd); // Since the listen socket is not used in child, close it.
-                return send_file_by_child_process(sockfd_accept);
+                return send_file_by_child_process(sockfd_accept, &client_addr);
             } else if (pid < 0) {
                 perror("[Error] Failed to create a child process");
                 close(sockfd_accept);
@@ -156,15 +165,14 @@ int run_server() {
             close(sockfd_accept);
         } else if (accept_mode == USE_MULTI_THREAD) {
             info = malloc(sizeof(thread_info_s));
-            info->sockfd = sockfd_accept;
+            info->sockfd      = sockfd_accept;
+            info->client_addr = client_addr;
             if (pthread_create(&info->tid, NULL, send_file_by_thread, info) != 0) { // Create a thread.
                 perror("[Error] Failed to create a thread");
                 close(sockfd_accept);
                 close(sockfd);
                 return 1;
             }
-            printf("[Thread] (TID=%ld) Client is connected. (%s:%d)\n", info->tid, 
-                    inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
             pthread_detach(info->tid);
         }
     }
