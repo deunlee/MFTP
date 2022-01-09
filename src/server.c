@@ -7,9 +7,9 @@
 void print_prefix() {
     if (accept_mode == USE_MULTI_PROCESS) {
         if (debug) {
-            printf("[Child] (PID=%d) ", getpid());
+            printf("[Child]  (PID=%d) ", getpid());
         } else {
-            printf("[Child] ");
+            printf("[Child]  ");
         }
     } else if (accept_mode == USE_MULTI_THREAD) {
         if (debug) {
@@ -53,7 +53,7 @@ int send_file(int sockfd, struct sockaddr_in* client_addr) {
     fseek(fp, 0, SEEK_END);
     total_size = ftell(fp); // Get file size.
     fseek(fp, 0, SEEK_SET);
-    if (send(sockfd, &total_size, sizeof(total_size), 0) == -1) {
+    if (send(sockfd, &total_size, sizeof(total_size), 0) == -1) { // Send file size.
         perror("[Error] Failed to send a file data");
         RETURN(1);
     }
@@ -83,7 +83,6 @@ void* send_file_by_thread(void* arg) {
 int send_file_by_child_process(int sockfd, struct sockaddr_in* client_addr) {
     int ret;
     ret = send_file(sockfd, client_addr);
-    kill(getppid(), SIGUSR1); // Send SIGUSR1 signal to the parent.
     return ret;
 }
 
@@ -93,13 +92,14 @@ void signal_handler(int signal) {
     if (debug) {
         psignal(signal, "[Server] Received signal");
     }
-    if (accept_mode == USE_MULTI_PROCESS) {
-        pid = wait(&status);
-        if (! debug) return;
-        if (pid > 0) {
-            printf("[Server] (PID=%d) Child returned: %d\n", pid, WEXITSTATUS(status));
-        } else if (pid == -1) {
-            perror("[Error] Failed to wait a child process");
+    if (signal == SIGCHLD) { // When the child process exits
+        // To wait for any child process, use -1 as PID. Use WNOHANG flag for non-blocking mode.
+        // If several children are terminated at the same time, 
+        // SIGCHLD signal may be delivered less than the number of children, so while loop should be used.
+        while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+            if (debug) {
+                printf("[Server] (PID=%d) Child returned: %d\n", pid, WEXITSTATUS(status));
+            }
         }
     }
 }
@@ -112,9 +112,9 @@ int run_server() {
     pid_t pid;
     struct sigaction act;
 
-    act.sa_flags = 0;
+    act.sa_flags   = 0;
     act.sa_handler = signal_handler;
-    sigaction(SIGUSR1, &act, NULL); // Registers SIGUSR1 signal for child process return handling.
+    sigaction(SIGCHLD, &act, NULL); // Register signal for child process return handling.
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
 

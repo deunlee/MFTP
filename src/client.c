@@ -33,11 +33,11 @@ int receive_file(char* file_path, int bar_index) {
     // Send length of file path and file path to the server.
     size = strlen(file_path) + 1;
     if (send(sockfd, &size, sizeof(size), 0) == -1) {
-        bar_message(bar_index, "(Error) Failed to send length of file name.");
+        bar_message(bar_index, "(Error) Failed to send length of file path.");
         RETURN(1);
     }
     if (send(sockfd, file_path, size, 0) == -1) {
-        bar_message(bar_index, "(Error) Failed to send file name.");
+        bar_message(bar_index, "(Error) Failed to send file path.");
         RETURN(1);
     }
 
@@ -57,10 +57,10 @@ int receive_file(char* file_path, int bar_index) {
     bar_message(bar_index, buffer); // Show a message instead of bar for 1 second.
     usleep(1000 * 1000); // 1000ms
     bar_config(bar_index, total_size, basename(file_path));
-    bar_message(bar_index, NULL); // Clear message to show bar.
+    bar_message(bar_index, NULL); // Clear message to show a bar.
 
     // Notify the server that the file is ready to be downloaded.
-    send(sockfd, &sockfd, 1, 0); // just one byte
+    send(sockfd, &sockfd, 1, 0); // one byte
 
     // Download and save the file.
     while ((size = recv(sockfd, buffer, BUFFER_SIZE, 0)) > 0) {
@@ -69,7 +69,7 @@ int receive_file(char* file_path, int bar_index) {
         fwrite(buffer, size, 1, fp);
     }
 
-    // If recv() returns -1 or the file is not received to the end, print error message. 
+    // If recv() returns -1 or the file is not received to the end, print error message.
     if (size == -1 || total_size != received_size) {
         bar_message(bar_index, "(Error) Failed to receive file data.");
         RETURN(1);
@@ -92,12 +92,12 @@ int run_client() {
         printf("[Error] Please specify the file to be downloaded.\n");
         return 1;
     } else if (file_cnt > MAX_CLIENTS) {
-        printf("[Error] Too many files. Up to %d files are supported.\n", MAX_CLIENTS);
+        printf("[Error] Too many files. Up to %d files are supported at once.\n", MAX_CLIENTS);
         return 1;
     }
     if (! force_overwriting) {
         for (i = 0; i < file_cnt; i++) {
-            if (access(basename(file_path[i]), F_OK) == 0) { // If a file already exists:
+            if (access(basename(file_path[i]), F_OK) == 0) { // If a file already exists, print error.
                 printf("[Error] The file already exists. (%s)\n", basename(file_path[i]));
                 return 1;
             }

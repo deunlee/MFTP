@@ -92,6 +92,12 @@ int main(int argc, char* argv[]) {
         } else if (CHECK_ARG("-f") || CHECK_ARG("--force")) {
             force_overwriting = 1;
         }
+
+        // Unknown Options
+        else {
+            fprintf(stderr, "Unknown option. Please check usage with -h.\n");
+            return 1;
+        }
     }
 
     if (mode == MODE_SERVER) {

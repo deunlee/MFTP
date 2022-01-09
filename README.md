@@ -40,7 +40,6 @@ $ dd if=/dev/urandom of=128mb_2 bs=1024 count=131072
 $ dd if=/dev/urandom of=128mb_3 bs=1024 count=131072
 $ dd if=/dev/urandom of=128mb_4 bs=1024 count=131072
 $ sha1sum 128mb_*
-sha1sum 128mb_*
 38fadac5b5c8f47043100885b8ef0d51f9480b00  128mb_1
 451d455932f4fe19191322ba0c6a87958f1a54b8  128mb_2
 caeaebe47ac5eac99d1040ebaec9143eb13d3189  128mb_3
@@ -63,7 +62,7 @@ $ ./mftp -s
 ```
 
 ```
-./mftp -c 127.0.0.1 ~/128mb_1 ~/128mb_2 ~/128mb_3 ~/128mb_4
+$ ./mftp -c 127.0.0.1 ~/128mb_1 ~/128mb_2 ~/128mb_3 ~/128mb_4
 [Client] Start downloading 4 file(s).
 
 100% [=================================================>] 128mb_1         (FINISHED)
