@@ -18,7 +18,7 @@ WARNING: This program has no security features, including authentication.
 
 경고: 이 프로그램은 인증 기능을 비롯한 보안 기능이 없습니다.
 
----
+
 ## Build
 ```
 make
@@ -110,6 +110,5 @@ caeaebe47ac5eac99d1040ebaec9143eb13d3189  128mb_3
 9e60d73325615a67c4a38a9edc3e92a9b8c0423b  128mb_4
 ```
 
----
 ## License
 [MIT License](./LICENSE)
