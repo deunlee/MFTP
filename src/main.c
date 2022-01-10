@@ -25,8 +25,8 @@ void print_usage() {
     printf(" |_|  |_|_|       |_|  |_|     \n\n");
     printf("MFTP: Multiple File Transfer Program by Deun Lee\n\n");
 
-    printf("Usage: mftp -s      [-p port] [options]\n");
-    printf("       mftp -c host [-p port] [options] files\n");
+    printf("Usage: mftp -s    [-p port] [options]\n");
+    printf("       mftp -c ip [-p port] [options] files\n");
 
     printf("\nCommon Options: \n");
     printf("  -p, --port      #         server port to listen on/connect to\n");
@@ -42,7 +42,7 @@ void print_usage() {
     printf("      --thread              use multi-thread to accept clients (default)\n");
 
     printf("\nClient Options: \n");
-    printf("  -c, --client    <host>    run in client mode, connecting to <host>\n");
+    printf("  -c, --client    <ip>      run in client mode, connecting to <ip>\n");
     printf("  -f, --force               force overwriting of files when they exist\n");
     printf("\n");
 }
