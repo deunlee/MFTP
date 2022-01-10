@@ -80,12 +80,6 @@ void* send_file_by_thread(void* arg) {
     pthread_exit(0);
 }
 
-int send_file_by_child_process(int sockfd, struct sockaddr_in* client_addr) {
-    int ret;
-    ret = send_file(sockfd, client_addr);
-    return ret;
-}
-
 void signal_handler(int signal) {
     pid_t pid;
     int status;
@@ -155,7 +149,7 @@ int run_server() {
             pid = fork(); // Create a child process.
             if (pid == 0) {
                 close(sockfd); // Since the listen socket is not used in child, close it.
-                return send_file_by_child_process(sockfd_accept, &client_addr);
+                return send_file(sockfd_accept, &client_addr);
             } else if (pid < 0) {
                 perror("[Error] Failed to create a child process");
                 close(sockfd_accept);
